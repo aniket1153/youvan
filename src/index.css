@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+/* Brand tokens — YOUVAN royal blue + orange + green */
+@theme {
+  --color-primary: #1e3a8a;
+  --color-primary-light: #2563eb;
+  --color-accent: #f97316;
+  --color-green: #16a34a;
+  --color-surface: #0b1b4a;
+  --color-soft: #132a6b;
+  --color-ink: #0f172a;
+  --color-muted: #64748b;
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
+  --radius-card: 20px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: #f8fafc;
+  /* Continuous site-wide gradient — no flat white slabs */
+  background:
+    radial-gradient(ellipse 80% 50% at 10% 10%, rgb(249 115 22 / 0.28), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 90% 20%, rgb(22 163 74 / 0.22), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 80%, rgb(37 99 235 / 0.35), transparent 55%),
+    linear-gradient(165deg, #0b1b4a 0%, #1e3a8a 28%, #1e40af 52%, #0f766e 78%, #1e3a8a 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glass panels over the gradient */
+.glass {
+  background: rgb(255 255 255 / 0.14);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgb(255 255 255 / 0.28);
+  box-shadow: 0 20px 50px -20px rgb(0 0 0 / 0.35);
+}
+
+.glass-strong {
+  background: rgb(255 255 255 / 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgb(255 255 255 / 0.7);
+  box-shadow: 0 25px 60px -18px rgb(0 0 0 / 0.4);
+}
+
+.section-pad {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 4.5rem;
+  padding-bottom: 4.5rem;
+}
+
+@media (min-width: 640px) {
+  .section-pad {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+  }
+}
+
+.btn-glow {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.btn-glow:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -8px rgb(249 115 22 / 0.5);
+}
+
+.btn-glow:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+:focus-visible {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+}
+
+/* Mobile modal scroll lock helper */
+body.modal-open {
+  overflow: hidden;
+}
