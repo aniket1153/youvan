@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { toast } from 'react-toastify'
 import { PartyPopper, X } from 'lucide-react'
 import { INTEREST_OPTIONS } from '../data/content'
 import { useRegister } from '../context/RegisterContext'
@@ -68,6 +69,7 @@ function RegistrationForm() {
   const [touched, setTouched] = useState({})
   const [errors, setErrors] = useState(() => validateAll(INITIAL))
   const [showSuccess, setShowSuccess] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     setErrors(validateAll(form))
@@ -78,6 +80,13 @@ function RegistrationForm() {
     if (!isOpen) return
     document.body.classList.add('modal-open')
     return () => document.body.classList.remove('modal-open')
+  }, [isOpen])
+
+  // Reset transient submit state each time modal opens
+  useEffect(() => {
+    if (!isOpen) return
+    setIsSubmitting(false)
+    setShowSuccess(false)
   }, [isOpen])
 
   useEffect(() => {
@@ -122,7 +131,7 @@ function RegistrationForm() {
     setTouched((prev) => ({ ...prev, [e.target.name]: true }))
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     const allTouched = Object.keys(INITIAL).reduce(
       (acc, key) => ({ ...acc, [key]: true }),
@@ -134,9 +143,64 @@ function RegistrationForm() {
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
-    setShowSuccess(true)
-    setForm(INITIAL)
-    setTouched({})
+    const apiBase = (
+      import.meta.env.VITE_API_URL || 'https://youvan-backend.vercel.app'
+    ).replace(/\/$/, '')
+
+    // Payload matches backend POST /api/register + curl contract
+    const payload = {
+      fullName: form.fullName.trim(),
+      collegeName: form.collegeName.trim(),
+      age: Number(form.age),
+      education: form.education.trim(),
+      address: form.address.trim(),
+      whatsapp: form.whatsapp,
+      interests: form.interests,
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const res = await fetch(`${apiBase}/api/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      let data = null
+      try {
+        data = await res.json()
+      } catch {
+        data = null
+      }
+
+      if (!res.ok) {
+        const message =
+          data?.message ||
+          data?.error ||
+          (Array.isArray(data?.errors) && data.errors[0]?.msg) ||
+          'नोंदणी अयशस्वी. पुन्हा प्रयत्न करा.'
+        throw new Error(message)
+      }
+
+      toast.success(
+        data?.message ||
+          'नोंदणी यशस्वी! डेटा सेव्ह झाला. आम्ही लवकरच WhatsApp वर संपर्क करू.',
+      )
+      setShowSuccess(true)
+      setForm(INITIAL)
+      setTouched({})
+    } catch (err) {
+      const isNetwork =
+        err instanceof TypeError ||
+        /Failed to fetch|NetworkError/i.test(String(err?.message || ''))
+      const message = isNetwork
+        ? 'सर्व्हरशी कनेक्ट होऊ शकले नाही. Backend तपासा (youvan-backend.vercel.app).'
+        : err.message || 'नोंदणी अयशस्वी. पुन्हा प्रयत्न करा.'
+      toast.error(message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   function handleClose() {
@@ -425,10 +489,10 @@ function RegistrationForm() {
               <button
                 type="submit"
                 form="youvan-register-form"
-                disabled={!isValid}
+                disabled={!isValid || isSubmitting}
                 className="btn-glow w-full rounded-full bg-gradient-to-r from-accent via-orange-500 to-[#fbbf24] px-6 py-3.5 text-base font-bold text-white shadow-lg shadow-orange-500/30 disabled:shadow-none"
               >
-                नोंदणी करा
+                {isSubmitting ? 'नोंदणी होत आहे...' : 'नोंदणी करा'}
               </button>
             </div>
 
